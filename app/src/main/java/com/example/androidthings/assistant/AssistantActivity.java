@@ -24,6 +24,8 @@ import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import com.example.androidthings.assistant.EmbeddedAssistant.ConversationCallback;
@@ -64,13 +66,14 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
     private VoiceHat mVoiceHat;
     private Button mButton;
     private Gpio mLed;
+    private android.widget.Button sampleButton;
 
     private Handler mMainHandler;
-
     // List & adapter to store and display the history of Assistant Requests.
     private EmbeddedAssistant mEmbeddedAssistant;
     private ArrayList<String> mAssistantRequests = new ArrayList<>();
     private ArrayAdapter<String> mAssistantRequestsAdapter;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -105,22 +108,25 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
                     }
                 }
             }
-            android.widget.Button sampleButton = findViewById(R.id.button);
+            sampleButton = findViewById(R.id.button);
+            final Animation myAnim = AnimationUtils.loadAnimation(this, R.anim.bouncetwo);
             sampleButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+                    sampleButton.startAnimation(myAnim);
                     mEmbeddedAssistant.startConversation();
                 }
             });
 
-//            mButton = new Button(BoardDefaults.getGPIOForButton(),
-//                    Button.LogicState.PRESSED_WHEN_LOW);
-//            mButton.setDebounceDelay(BUTTON_DEBOUNCE_DELAY_MS);
-//            mButton.setOnButtonEventListener(this);
-//            PeripheralManagerService pioService = new PeripheralManagerService();
-//            mLed = pioService.openGpio(BoardDefaults.getGPIOForLED());
-//            mLed.setDirection(Gpio.DIRECTION_OUT_INITIALLY_LOW);
-//            mLed.setActiveType(Gpio.ACTIVE_LOW);
+            /*
+            mButton = new Button(BoardDefaults.getGPIOForButton(),
+                    Button.LogicState.PRESSED_WHEN_LOW);
+            mButton.setDebounceDelay(BUTTON_DEBOUNCE_DELAY_MS);
+            mButton.setOnButtonEventListener(this);
+            PeripheralManagerService pioService = new PeripheralManagerService();
+            mLed = pioService.openGpio(BoardDefaults.getGPIOForLED());
+            mLed.setDirection(Gpio.DIRECTION_OUT_INITIALLY_LOW);
+            mLed.setActiveType(Gpio.ACTIVE_LOW);*/
         } catch (IOException e) {
             Log.e(TAG, "error configuring peripherals:", e);
             return;
@@ -179,11 +185,13 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
                     @Override
                     public void onConversationError(Status error) {
                         Log.e(TAG, "converse response error: " + error);
+                        sampleButton.clearAnimation();
                     }
 
                     @Override
                     public void onError(Throwable throwable) {
                         Log.e(TAG, "converse error:", throwable);
+                        sampleButton.clearAnimation();
                     }
 
                     @Override
@@ -200,6 +208,8 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
                     @Override
                     public void onConversationFinished() {
                         Log.i(TAG, "assistant conversation finished");
+                        sampleButton.clearAnimation();
+
                         if (mLed != null) {
                             try {
                                 mLed.setValue(false);
