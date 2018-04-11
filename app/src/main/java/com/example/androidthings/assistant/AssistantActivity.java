@@ -16,18 +16,23 @@
 
 package com.example.androidthings.assistant;
 
+import android.Manifest;
 import android.app.Activity;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.media.AudioFormat;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+
 import com.example.androidthings.assistant.EmbeddedAssistant.ConversationCallback;
 import com.example.androidthings.assistant.EmbeddedAssistant.RequestCallback;
 import com.google.android.things.contrib.driver.button.Button;
@@ -37,10 +42,12 @@ import com.google.android.things.pio.PeripheralManagerService;
 import com.google.assistant.embedded.v1alpha1.ConverseResponse.EventType;
 import com.google.auth.oauth2.UserCredentials;
 import com.google.rpc.Status;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.json.JSONException;
 
 public class AssistantActivity extends Activity implements Button.OnButtonEventListener {
@@ -82,7 +89,7 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
 
         setContentView(R.layout.activity_main);
 
-        ListView assistantRequestsListView = (ListView)findViewById(R.id.assistantRequestsListView);
+        ListView assistantRequestsListView = (ListView) findViewById(R.id.assistantRequestsListView);
         mAssistantRequestsAdapter =
                 new ArrayAdapter<>(this, android.R.layout.simple_list_item_1,
                         mAssistantRequests);
@@ -113,6 +120,7 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
             sampleButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+                    //startActivity(new Intent(Intent.ACTION_VOICE_COMMAND).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
                     sampleButton.startAnimation(myAnim);
                     mEmbeddedAssistant.startConversation();
                 }
@@ -132,6 +140,17 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
             return;
         }
 
+        permissionCheck();
+
+    }
+
+    private void permissionCheck(){
+        if (PermissionUtil.on().requestPermission(this, Manifest.permission.RECORD_AUDIO)) {
+            buildEmbeddedAssistant();
+        }
+    }
+
+    private void buildEmbeddedAssistant() {
         // Set volume from preferences
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         int initVolume = preferences.getInt(PREF_CURRENT_VOLUME, DEFAULT_VOLUME);
@@ -223,6 +242,7 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
         mEmbeddedAssistant.connect();
     }
 
+
     @Override
     public void onButtonEvent(Button button, boolean pressed) {
         try {
@@ -268,5 +288,14 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
             mVoiceHat = null;
         }
         mEmbeddedAssistant.destroy();
+    }
+
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (Manifest.permission.RECORD_AUDIO.equals(permissions[0])){
+            permissionCheck();
+        }
+
     }
 }
