@@ -74,6 +74,7 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
     private Button mButton;
     private Gpio mLed;
     private android.widget.Button sampleButton;
+    private android.widget.Button googleButton;
 
     private Handler mMainHandler;
     // List & adapter to store and display the history of Assistant Requests.
@@ -120,9 +121,16 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
             sampleButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    //startActivity(new Intent(Intent.ACTION_VOICE_COMMAND).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
                     sampleButton.startAnimation(myAnim);
                     mEmbeddedAssistant.startConversation();
+                }
+            });
+
+            googleButton = findViewById(R.id.buttonGoogle);
+            googleButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    startActivity(new Intent(Intent.ACTION_VOICE_COMMAND).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
                 }
             });
 
@@ -192,7 +200,9 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
 
                     @Override
                     public void onAudioSample(ByteBuffer audioSample) {
+                        Log.d(TAG, "onAudioSample():");
                         if (mLed != null) {
+
                             try {
                                 mLed.setValue(!mLed.getValue());
                             } catch (IOException e) {
