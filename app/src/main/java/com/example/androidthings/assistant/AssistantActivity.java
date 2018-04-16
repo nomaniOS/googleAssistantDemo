@@ -33,10 +33,11 @@ import android.view.animation.AnimationUtils;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import com.example.RM.RMController;
 import com.example.androidthings.assistant.EmbeddedAssistant.ConversationCallback;
 import com.example.androidthings.assistant.EmbeddedAssistant.RequestCallback;
-import com.google.android.things.contrib.driver.button.Button;
-import com.google.android.things.contrib.driver.voicehat.VoiceHat;
+//import com.google.android.things.contrib.driver.button.Button;
+//import com.google.android.things.contrib.driver.voicehat.VoiceHat;
 import com.google.android.things.pio.Gpio;
 import com.google.android.things.pio.PeripheralManagerService;
 import com.google.assistant.embedded.v1alpha1.ConverseResponse.EventType;
@@ -50,7 +51,8 @@ import java.util.List;
 
 import org.json.JSONException;
 
-public class AssistantActivity extends Activity implements Button.OnButtonEventListener {
+public class AssistantActivity extends Activity {
+    //public class AssistantActivity extends Activity implements Button.OnButtonEventListener {
     private static final String TAG = AssistantActivity.class.getSimpleName();
 
     // Peripheral and drivers constants.
@@ -70,8 +72,8 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
                     .setSampleRate(SAMPLE_RATE)
                     .build();
     // Hardware peripherals.
-    private VoiceHat mVoiceHat;
-    private Button mButton;
+    //private VoiceHat mVoiceHat;
+    //private Button mButton;
     private Gpio mLed;
     private android.widget.Button sampleButton;
     private android.widget.Button googleButton;
@@ -97,12 +99,12 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
         assistantRequestsListView.setAdapter(mAssistantRequestsAdapter);
         mMainHandler = new Handler(getMainLooper());
 
-        try {
+      //  try {
             if (AUDIO_USE_I2S_VOICEHAT_IF_AVAILABLE) {
                 PeripheralManagerService pioService = new PeripheralManagerService();
                 List<String> i2sDevices = pioService.getI2sDeviceList();
                 if (i2sDevices.size() > 0) {
-                    try {
+                    /*try {
                         Log.i(TAG, "creating voice hat driver");
                         mVoiceHat = new VoiceHat(
                                 BoardDefaults.getI2SDeviceForVoiceHat(),
@@ -113,7 +115,7 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
                         mVoiceHat.registerAudioOutputDriver();
                     } catch (IllegalStateException e) {
                         Log.w(TAG, "Unsupported board, falling back on default audio device:", e);
-                    }
+                    }*/
                 }
             }
             sampleButton = findViewById(R.id.button);
@@ -143,10 +145,10 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
             mLed = pioService.openGpio(BoardDefaults.getGPIOForLED());
             mLed.setDirection(Gpio.DIRECTION_OUT_INITIALLY_LOW);
             mLed.setActiveType(Gpio.ACTIVE_LOW);*/
-        } catch (IOException e) {
-            Log.e(TAG, "error configuring peripherals:", e);
-            return;
-        }
+//        } catch (IOException e) {
+//            Log.e(TAG, "error configuring peripherals:", e);
+//            return;
+//        }
 
         permissionCheck();
 
@@ -253,18 +255,25 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
     }
 
 
+//    @Override
+//    public void onButtonEvent(Button button, boolean pressed) {
+//        try {
+//            if (mLed != null) {
+//                mLed.setValue(pressed);
+//            }
+//        } catch (IOException e) {
+//            Log.d(TAG, "error toggling LED:", e);
+//        }
+//        if (pressed) {
+//            mEmbeddedAssistant.startConversation();
+//        }
+//    }
+
+
     @Override
-    public void onButtonEvent(Button button, boolean pressed) {
-        try {
-            if (mLed != null) {
-                mLed.setValue(pressed);
-            }
-        } catch (IOException e) {
-            Log.d(TAG, "error toggling LED:", e);
-        }
-        if (pressed) {
-            mEmbeddedAssistant.startConversation();
-        }
+    protected void onResume() {
+        super.onResume();
+        RMController.on().connect(this);
     }
 
     @Override
@@ -279,25 +288,26 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
             }
             mLed = null;
         }
-        if (mButton != null) {
-            try {
-                mButton.close();
-            } catch (IOException e) {
-                Log.w(TAG, "error closing button", e);
-            }
-            mButton = null;
-        }
-        if (mVoiceHat != null) {
-            try {
-                mVoiceHat.unregisterAudioOutputDriver();
-                mVoiceHat.unregisterAudioInputDriver();
-                mVoiceHat.close();
-            } catch (IOException e) {
-                Log.w(TAG, "error closing voice hat driver", e);
-            }
-            mVoiceHat = null;
-        }
+//        if (mButton != null) {
+//            try {
+//                mButton.close();
+//            } catch (IOException e) {
+//                Log.w(TAG, "error closing button", e);
+//            }
+//            mButton = null;
+//        }
+//        if (mVoiceHat != null) {
+//            try {
+//                mVoiceHat.unregisterAudioOutputDriver();
+//                mVoiceHat.unregisterAudioInputDriver();
+//                mVoiceHat.close();
+//            } catch (IOException e) {
+//                Log.w(TAG, "error closing voice hat driver", e);
+//            }
+//            mVoiceHat = null;
+//        }
         mEmbeddedAssistant.destroy();
+        RMController.on().disconnect();
     }
 
 

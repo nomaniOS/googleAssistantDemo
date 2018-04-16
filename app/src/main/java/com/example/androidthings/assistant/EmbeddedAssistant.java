@@ -77,7 +77,7 @@ public class EmbeddedAssistant {
             new StreamObserver<ConverseResponse>() {
                 @Override
                 public void onNext(ConverseResponse value) {
-                    Log.e(TAG, "StreamObserver on next "+ value);
+                    Log.e(TAG, "StreamObserver on next ");
                     switch (value.getConverseResponseCase()) {
                         case EVENT_TYPE:
                             mConversationCallback.onConversationEvent(value.getEventType());
